@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1018">
+  <title>SignalScope — Intel &amp; Defense</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1018;
+      --panel: #111923;
+      --panel-2: #151f2b;
+      --line: #25313d;
+      --muted: #82909e;
+      --text: #e7edf2;
+      --cyan: #66e0d0;
+      --blue: #79a9ff;
+      --amber: #f2bf69;
+      --red: #ff777e;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
+    button { font: inherit; }
+    .app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { display: flex; flex-direction: column; padding: 25px 16px 18px; border-right: 1px solid var(--line); background: #0d141d; }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 10px 29px; }
+    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #34776e; border-radius: 10px; color: var(--cyan); background: #15312e; font-weight: 800; }
+    .brand-name { font-size: 15px; font-weight: 750; letter-spacing: .04em; }
+    .brand-sub { margin-top: 2px; color: var(--muted); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; }
+    .section-label { padding: 0 11px; margin: 9px 0 9px; color: #647280; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+    .nav { display: grid; gap: 4px; }
+    .nav button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border: 1px solid transparent; border-radius: 8px; color: #9daab6; background: transparent; text-align: left; cursor: pointer; font-size: 13px; transition: .18s ease; }
+    .nav button:hover { color: var(--text); background: #151f2a; }
+    .nav button.active { border-color: #24413f; color: var(--cyan); background: #142522; }
+    .nav-icon { width: 17px; color: currentColor; text-align: center; font-size: 15px; }
+    .sidebar-bottom { margin-top: auto; }
+    .demo-card { padding: 13px; border: 1px solid #344037; border-radius: 10px; background: #1b241f; }
+    .demo-card strong { display: block; margin-bottom: 5px; color: var(--amber); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .demo-card p { margin: 0; color: #a9b5ad; font-size: 11px; line-height: 1.55; }
+    .user { display: flex; align-items: center; gap: 10px; padding: 18px 8px 0; color: var(--muted); font-size: 11px; }
+    .avatar { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 50%; color: #c6d9ff; background: #233453; font-size: 10px; font-weight: 700; }
+    main { min-width: 0; padding: 26px clamp(18px, 3.2vw, 48px) 40px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+    .crumb { color: var(--muted); font-size: 12px; }
+    .crumb span { color: #c7d1da; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .status { display: flex; align-items: center; gap: 7px; color: #9ba8b5; font-size: 11px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px #66e0d077; }
+    .icon-button { display: grid; place-items: center; width: 33px; height: 33px; border: 1px solid var(--line); border-radius: 8px; color: #9eabb7; background: var(--panel); cursor: pointer; }
+    .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin: 27px 0 22px; }
+    .eyebrow { margin-bottom: 8px; color: var(--cyan); font-size: 10px; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(24px, 3vw, 33px); font-weight: 640; letter-spacing: -.04em; }
+    .subheading { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .date-chip { flex: 0 0 auto; padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px; color: #aab6c1; background: var(--panel); font-size: 11px; }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 17px; }
+    .metric, .panel { border: 1px solid var(--line); border-radius: 11px; background: var(--panel); }
+    .metric { min-height: 104px; padding: 15px 16px; }
+    .metric-label { color: var(--muted); font-size: 11px; }
+    .metric-main { display: flex; align-items: baseline; gap: 9px; margin-top: 13px; }
+    .metric-value { font-size: 24px; font-weight: 650; letter-spacing: -.04em; }
+    .metric-note { color: var(--muted); font-size: 10px; }
+    .metric-note.good { color: var(--cyan); }
+    .metric-note.warn { color: var(--amber); }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.68fr) minmax(280px, .92fr); gap: 16px; align-items: stretch; }
+    .panel { min-width: 0; padding: 17px; }
+    .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    h2 { margin: 0; font-size: 14px; font-weight: 620; }
+    .panel-caption { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .pill { padding: 5px 8px; border: 1px solid #2d4241; border-radius: 20px; color: var(--cyan); background: #162725; font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+    .diagram-wrap { position: relative; overflow: hidden; min-height: 295px; margin-top: 18px; border: 1px solid #202c37; border-radius: 9px; background: radial-gradient(ellipse at 50% 48%, #182631 0, #111923 68%); }
+    .diagram { display: block; width: 100%; height: 295px; }
+    .diagram .link { fill: none; stroke: #425461; stroke-width: 1.5; stroke-dasharray: 4 5; }
+    .diagram .link-risk { stroke: #d29d58; }
+    .diagram .link-safe { stroke: #48ad9e; }
+    .diagram .node-box { fill: #17232d; stroke: #354653; stroke-width: 1; }
+    .diagram .node-risk { fill: #2a241b; stroke: #927047; }
+    .diagram .node-safe { fill: #162a28; stroke: #397c70; }
+    .diagram .node-title { fill: #e1e9ee; font-size: 12px; font-weight: 650; }
+    .diagram .node-sub { fill: #8493a0; font-size: 9px; }
+    .diagram .node-kicker { fill: #dbb878; font-size: 8px; font-weight: 700; letter-spacing: 1px; }
+    .diagram .node-kicker-safe { fill: #69d6c5; }
+    .legend { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 13px; color: #8e9ba8; font-size: 10px; }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .legend i { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+    .legend .green { background: var(--cyan); }
+    .profile { display: flex; align-items: center; gap: 12px; padding: 15px 0 14px; border-bottom: 1px solid var(--line); }
+    .profile-avatar { display: grid; place-items: center; width: 43px; height: 43px; border: 1px solid #354969; border-radius: 12px; color: #c6d9ff; background: #202d43; font-size: 13px; font-weight: 700; }
+    .profile h3 { margin: 0; font-size: 13px; font-weight: 620; }
+    .profile p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+    .fiction-tag { margin-left: auto; padding: 4px 6px; border-radius: 4px; color: #b5c5dc; background: #263345; font-size: 8px; font-weight: 700; letter-spacing: .06em; }
+    .facts { display: grid; gap: 0; }
+    .fact { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #202a34; font-size: 10px; }
+    .fact span:first-child { color: var(--muted); }
+    .fact span:last-child { color: #cbd4dc; text-align: right; }
+    .source-title { margin: 16px 0 10px; color: #aeb9c4; font-size: 10px; font-weight: 650; }
+    .source { display: flex; align-items: center; gap: 8px; margin: 8px 0; color: #aeb9c4; font-size: 10px; }
+    .source-check { color: var(--cyan); font-size: 12px; }
+    .disclaimer { margin-top: 14px; padding: 10px; border-left: 2px solid #4b8190; color: #91a0ad; background: #14212a; font-size: 9px; line-height: 1.5; }
+    .bottom-grid { display: grid; grid-template-columns: minmax(0, 1.68fr) minmax(280px, .92fr); gap: 16px; margin-top: 16px; }
+    .table { width: 100%; margin-top: 14px; border-collapse: collapse; text-align: left; }
+    .table th { padding: 0 8px 9px; color: #6f7e8b; font-size: 9px; font-weight: 650; letter-spacing: .09em; text-transform: uppercase; }
+    .table td { padding: 10px 8px; border-top: 1px solid #202a34; color: #b9c4cd; font-size: 10px; }
+    .table tr:hover td { background: #151f29; }
+    .severity { display: inline-flex; align-items: center; gap: 6px; }
+    .severity i { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); }
+    .severity.info i { background: var(--blue); }
+    .severity.normal i { background: var(--cyan); }
+    .state { color: var(--cyan) !important; }
+    .event-list { display: grid; gap: 14px; margin-top: 15px; }
+    .event { display: grid; grid-template-columns: 34px 1fr; gap: 10px; }
+    .event-icon { display: grid; place-items: center; width: 29px; height: 29px; border: 1px solid #374434; border-radius: 8px; color: var(--amber); background: #29271e; font-size: 12px; }
+    .event-icon.ok { border-color: #29544e; color: var(--cyan); background: #172a28; }
+    .event-copy strong { display: block; color: #cbd4dc; font-size: 10px; font-weight: 600; }
+    .event-copy p { margin: 4px 0 0; color: var(--muted); font-size: 9px; line-height: 1.5; }
+    .event-time { color: #71808d; font-size: 9px; }
+    .footer-note { margin-top: 20px; color: #667481; font-size: 9px; text-align: right; }
+    .toast { position: fixed; right: 20px; bottom: 20px; padding: 11px 14px; border: 1px solid #397c70; border-radius: 8px; color: var(--cyan); background: #142522; font-size: 11px; opacity: 0; transform: translateY(8px); transition: .2s ease; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media (max-width: 1050px) {
+      .app { grid-template-columns: 210px minmax(0, 1fr); }
+      .layout, .bottom-grid { grid-template-columns: minmax(0, 1.3fr) minmax(255px, .9fr); }
+      .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      .app { display: block; }
+      .sidebar { position: static; padding: 13px 15px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { padding: 0 2px 12px; }
+      .section-label, .sidebar-bottom { display: none; }
+      .nav { display: flex; overflow-x: auto; }
+      .nav button { width: auto; flex: 0 0 auto; padding: 9px 10px; font-size: 11px; }
+      .nav-icon { display: none; }
+      main { padding: 18px 15px 28px; }
+      .layout, .bottom-grid { grid-template-columns: 1fr; }
+      .page-heading { align-items: flex-start; }
+      .date-chip { display: none; }
+    }
+    @media (max-width: 420px) {
+      .metrics { gap: 8px; }
+      .metric { min-height: 90px; padding: 12px; }
+      .metric-value { font-size: 21px; }
+      .table th, .table td { padding-left: 4px; padding-right: 4px; font-size: 9px; }
+      .status { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div><div class="brand-name">SIGNALSCOPE</div><div class="brand-sub">Intel &amp; defense</div></div>
+      </div>
+      <div class="section-label">Workspace</div>
+      <nav class="nav" aria-label="Navigasi utama">
+        <button class="active" data-section="overview"><span class="nav-icon">◫</span> Ikhtisar</button>
+        <button data-section="profile"><span class="nav-icon">◎</span> Profil simulasi</button>
+        <button data-section="diagram"><span class="nav-icon">⌘</span> Diagram risiko</button>
+        <button data-section="events"><span class="nav-icon">◷</span> Sinyal &amp; mitigasi</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="demo-card"><strong>Mode aman · simulasi</strong><p>Seluruh identitas dan peristiwa di halaman ini fiktif. Tidak ada pelacakan nomor atau individu.</p></div>
+        <div class="user"><div class="avatar">AN</div><div>Analyst workspace<br><span style="color:#657380">Defensive research</span></div></div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="crumb">Workspace <span> / Intel overview</span></div>
+        <div class="top-actions">
+          <div class="status"><i class="dot"></i> Data simulasi aktif</div>
+          <button class="icon-button" id="helpButton" aria-label="Informasi halaman" title="Informasi halaman">?</button>
+        </div>
+      </header>
+
+      <section class="page-heading" id="overview">
+        <div><div class="eyebrow">Telecom threat intelligence</div><h1>OSINT &amp; SS7 Defense Overview</h1><p class="subheading">Ruang kerja edukatif untuk memetakan paparan, sinyal, dan respons defensif.</p></div>
+        <div class="date-chip">◷ &nbsp; Dataset demo · 13 Nov 2026</div>
+      </section>
+
+      <section class="metrics" aria-label="Ringkasan">
+        <article class="metric"><div class="metric-label">Entitas fiktif</div><div class="metric-main"><span class="metric-value">01</span><span class="metric-note">profil demo</span></div></article>
+        <article class="metric"><div class="metric-label">Relasi dipetakan</div><div class="metric-main"><span class="metric-value">06</span><span class="metric-note">data sintetis</span></div></article>
+        <article class="metric"><div class="metric-label">Sinyal anomali</div><div class="metric-main"><span class="metric-value">03</span><span class="metric-note warn">perlu ditinjau</span></div></article>
+        <article class="metric"><div class="metric-label">Kontrol mitigasi</div><div class="metric-main"><span class="metric-value">04</span><span class="metric-note good">aktif di simulasi</span></div></article>
+      </section>
+
+      <section class="layout">
+        <article class="panel" id="diagram">
+          <div class="panel-heading"><div><h2>Diagram risiko SS7 — konseptual</h2><p class="panel-caption">Alur dampak yang mungkin dan titik kontrol defensif · bukan panduan serangan</p></div><span class="pill">Threat model</span></div>
+          <div class="diagram-wrap">
+            <svg class="diagram" viewBox="0 0 700 295" role="img" aria-labelledby="diagramTitle diagramDesc">
+              <title id="diagramTitle">Diagram konseptual risiko dan mitigasi SS7</title>
+              <desc id="diagramDesc">Ancaman signaling eksternal dapat memengaruhi jaringan operator dan menimbulkan risiko privasi atau integritas pesan. Pemantauan dan kontrol operator mengurangi dampak.</desc>
+              <defs>
+                <marker id="arrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="none" stroke="#647987" stroke-width="1"/></marker>
+                <marker id="arrowAmber" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="none" stroke="#d29d58" stroke-width="1"/></marker>
+                <marker id="arrowGreen" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0 0L7 3.5L0 7" fill="none" stroke="#48ad9e" stroke-width="1"/></marker>
+              </defs>
+              <path class="link link-risk" d="M158 82 C210 82 206 138 250 138" marker-end="url(#arrowAmber)"/>
+              <path class="link link-risk" d="M390 138 C437 138 440 83 488 83" marker-end="url(#arrowAmber)"/>
+              <path class="link" d="M390 150 C443 150 438 218 488 218" marker-end="url(#arrow)"/>
+              <path class="link link-safe" d="M324 181 C324 215 324 221 324 237" marker-end="url(#arrowGreen)"/>
+              <path class="link link-safe" d="M488 226 C431 260 400 258 370 258" marker-end="url(#arrowGreen)"/>
+              <rect class="node-box node-risk" x="22" y="46" width="136" height="72" rx="9"/>
+              <text class="node-kicker" x="37" y="65">SUMBER RISIKO</text><text class="node-title" x="37" y="84">Trust boundary</text><text class="node-sub" x="37" y="101">partner / signaling</text>
+              <rect class="node-box" x="250" y="101" width="140" height="78" rx="9"/>
+              <text class="node-kicker" x="266" y="121" fill="#9db4ca">LINGKUNGAN</text><text class="node-title" x="266" y="141">Jaringan operator</text><text class="node-sub" x="266" y="158">infrastruktur legacy</text>
+              <rect class="node-box node-risk" x="488" y="46" width="184" height="72" rx="9"/>
+              <text class="node-kicker" x="504" y="65">DAMPAK POTENSIAL</text><text class="node-title" x="504" y="84">Privasi &amp; lokasi</text><text class="node-sub" x="504" y="101">risiko bergantung konteks</text>
+              <rect class="node-box node-risk" x="488" y="183" width="184" height="72" rx="9"/>
+              <text class="node-kicker" x="504" y="202">DAMPAK POTENSIAL</text><text class="node-title" x="504" y="221">Integritas pesan</text><text class="node-sub" x="504" y="238">kepercayaan OTP dapat terdampak</text>
+              <rect class="node-box node-safe" x="235" y="226" width="150" height="53" rx="9"/>
+              <text class="node-kicker node-kicker-safe" x="250" y="245">KONTROL DEFENSIF</text><text class="node-title" x="250" y="263">Filter · monitor · respons</text>
+            </svg>
+          </div>
+          <div class="legend"><span><i></i> Risiko konseptual</span><span><i class="green"></i> Kontrol defensif</span><span>Data simulasi, bukan telemetri langsung</span></div>
+        </article>
+
+        <article class="panel" id="profile">
+          <div class="panel-heading"><div><h2>Profil biografi (demo)</h2><p class="panel-caption">Contoh pemetaan sumber terbuka yang etis</p></div><span class="pill">Fiktif</span></div>
+          <div class="profile"><div class="profile-avatar">NP</div><div><h3>Nadia Pratama</h3><p>Persona sintetis · analis keamanan</p></div><span class="fiction-tag">DEMO</span></div>
+          <div class="facts">
+            <div class="fact"><span>Identitas</span><span>Fiktif, bukan orang nyata</span></div>
+            <div class="fact"><span>Lokasi</span><span>Tidak dikumpulkan</span></div>
+            <div class="fact"><span>Kontak / nomor</span><span>Tidak disimpan</span></div>
+            <div class="fact"><span>Tujuan</span><span>Edukasi &amp; privasi</span></div>
+          </div>
+          <div class="source-title">Sumber simulasi</div>
+          <div class="source"><span class="source-check">✓</span> Dataset profil buatan</div>
+          <div class="source"><span class="source-check">✓</span> Relasi sintetis tanpa identitas nyata</div>
+          <div class="disclaimer">Gunakan OSINT hanya untuk kepentingan sah, data publik yang relevan, dan dengan menghormati privasi. Hindari doxxing, pelacakan individu, atau pengumpulan data sensitif.</div>
+        </article>
+      </section>
+
+      <section class="bottom-grid">
+        <article class="panel" id="events">
+          <div class="panel-heading"><div><h2>Indikator &amp; tindakan defensif</h2><p class="panel-caption">Contoh observasi untuk tim keamanan operator</p></div><span class="pill">3 observasi</span></div>
+          <table class="table">
+            <thead><tr><th>Indikator</th><th>Tingkat</th><th>Tindakan yang disarankan</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Pola signaling tidak lazim</td><td><span class="severity"><i></i> Sedang</span></td><td>Tinjau anomali agregat</td><td class="state">Dipantau</td></tr>
+              <tr><td>Permintaan lintas jaringan menyimpang</td><td><span class="severity"><i></i> Sedang</span></td><td>Validasi mitra tepercaya</td><td class="state">Difilter</td></tr>
+              <tr><td>Risiko ketergantungan SMS OTP</td><td><span class="severity info"><i></i> Info</span></td><td>Utamakan MFA tahan phishing</td><td class="state">Disarankan</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="panel">
+          <div class="panel-heading"><div><h2>Catatan respons</h2><p class="panel-caption">Praktik mitigasi tingkat tinggi</p></div></div>
+          <div class="event-list">
+            <div class="event"><div class="event-icon">⌕</div><div class="event-copy"><strong>Pemantauan signaling</strong><p>Bangun baseline dan tinjau perubahan trafik lewat kanal internal yang berwenang.</p></div></div>
+            <div class="event"><div class="event-icon ok">✓</div><div class="event-copy"><strong>Validasi &amp; filtering</strong><p>Terapkan kebijakan operator untuk memeriksa dan membatasi trafik yang tidak tepercaya.</p></div></div>
+            <div class="event"><div class="event-icon ok">↗</div><div class="event-copy"><strong>Kurangi risiko autentikasi</strong><p>Jangan jadikan SMS satu-satunya faktor; gunakan passkey atau MFA tahan phishing.</p></div></div>
+          </div>
+        </article>
+      </section>
+      <div class="footer-note">SignalScope · tampilan edukatif · tidak terhubung ke jaringan telekomunikasi atau sumber OSINT</div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const toast = document.getElementById("toast");
+    let toastTimer;
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+    document.querySelectorAll(".nav button").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelector(".nav button.active")?.classList.remove("active");
+        button.classList.add("active");
+        const target = document.getElementById(button.dataset.section);
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+    document.getElementById("helpButton").addEventListener("click", () => {
+      showToast("Demo edukatif: data sintetis, tanpa pelacakan atau koneksi jaringan.");
+    });
+  </script>
+</body>
+</html>
